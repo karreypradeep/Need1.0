@@ -3,6 +3,9 @@
 	xmlns:f="http://java.sun.com/jsf/core" xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:p="http://primefaces.org/ui"
 	xmlns:biz="http://java.sun.com/jsf/composite/apeironsol-components">
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{sectionBean.loadAllAcademicYearsForCurrentBranch}" />
+	</f:metadata>
 
 	<c:choose>
 		<c:when test="#{sectionBean.viewOrNewAction}">
@@ -41,9 +44,8 @@
 					<p:selectOneMenu id="academic_year" value="#{sectionBean.sectionSearchCriteria.academicYear}"
 						converter="academicYearConverter" style="width:165px;">
 						<f:selectItem itemLabel="Select academic year" itemValue="" />
-						<f:selectItems value="#{sectionBean.activeAcademicYears}" var="academicYear"
+						<f:selectItems value="#{sectionBean.allAcademicYearsForCurrentBranch}" var="academicYear"
 							itemLabel="#{academicYear.displayLabel}" itemValue="#{academicYear}" />
-						<p:ajax process="@this" />
 					</p:selectOneMenu>
 
 					<p:outputLabel id="class_label" value="#{msg.class_students}" for="class" />

@@ -180,17 +180,18 @@ public class SectionNotificationsBean extends AbstractNotificationBean {
 						.messageToBeSent(this.getNotificationText()).exam(this.getSelectedExamForNotification()).attendanceDate(DateUtil.getSystemDate())
 						.smsProvider(this.sessionBean.getCurrentBranchRule().getSmsProvider()).build();
 
+				ViewUtil.addMessage("Notifications are sent for processing.", FacesMessage.SEVERITY_INFO);
+				this.setViewBatchLogs();
+				this.loadBatchLogsFromDB = true;
+				this.batchFinished = false;
+				this.elementsProcessed = 0;
+
 				this.scheduledBatchLog = this.notificationService.sendNotificationForStudent(this.sectionBean.getSection(), this.scheduledBatchLog);
 			} catch (final Exception e) {
 				final FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), e.getMessage());
 				this.addMessage(message);
 			}
-			ViewUtil.addMessage("Notifications are sent for processing.", FacesMessage.SEVERITY_INFO);
-			this.setViewBatchLogs();
-			this.loadBatchLogsFromDB = true;
 			this.loadBatchLogsBySectionLevelAndSectionId();
-			this.batchFinished = false;
-			this.elementsProcessed = 0;
 		}
 		return null;
 	}
@@ -344,7 +345,7 @@ public class SectionNotificationsBean extends AbstractNotificationBean {
 	 */
 	public void checkBatchStopped() {
 		this.batchFinished = true;
-		if (this.scheduledBatchLog != null) {
+		if ((this.scheduledBatchLog != null) && (this.scheduledBatchLog.getId() != null)) {
 			this.scheduledBatchLog = this.batchLogService.findBatchLogById(this.scheduledBatchLog.getId());
 			if (BatchStatusConstant.CREATED.equals(this.scheduledBatchLog.getBatchStatusConstant())
 					|| BatchStatusConstant.DISTRIBUTED.equals(this.scheduledBatchLog.getBatchStatusConstant())) {
@@ -355,6 +356,10 @@ public class SectionNotificationsBean extends AbstractNotificationBean {
 				this.loadBatchLogsFromDB = true;
 				this.loadBatchLogsBySectionLevelAndSectionId();
 			}
+		} else if ((this.scheduledBatchLog != null)
+				&& ((this.scheduledBatchLog.getId() == null) && (BatchStatusConstant.CREATED.equals(this.scheduledBatchLog.getBatchStatusConstant()) || BatchStatusConstant.DISTRIBUTED
+						.equals(this.scheduledBatchLog.getBatchStatusConstant())))) {
+			this.batchFinished = false;
 		}
 	}
 
@@ -466,4 +471,13 @@ public class SectionNotificationsBean extends AbstractNotificationBean {
 		}
 		this.setExamsForNotification(examsMap.values());
 	}
+
+	/**
+	 * @param batchFinished
+	 *            the batchFinished to set
+	 */
+	public void setBatchFinished(final boolean batchFinished) {
+		this.batchFinished = batchFinished;
+	}
+
 }
